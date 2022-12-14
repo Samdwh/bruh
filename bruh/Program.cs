@@ -107,7 +107,7 @@ namespace CSPreALevelSkeleton
                                 Console.ReadLine();
                                 Cavern.Display(Monster.GetAwake());
                                 Count = Count + 1;
-                            } while (Count != 2 && !Eaten);
+                            } while (Count != 1 && !Eaten);
                         }
                         if (Eaten)
                         {
