@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 
 namespace CSPreALevelSkeleton
@@ -25,15 +22,17 @@ namespace CSPreALevelSkeleton
             private Item Flask = new Item();
             private Trap Trap1 = new Trap();
             private Trap Trap2 = new Trap();
+            private Trap Trap3 = new Trap();
+
             private Trap Star1 = new Trap();
             private Trap Star2 = new Trap();
 
             private Boolean TrainingGame;
 
-            public Game(Boolean IsATrainingGame)
+            public Game(Boolean IsATrainingGame, int level)
             {
                 TrainingGame = IsATrainingGame;
-                SetUpGame();
+                SetUpGame(level);
                 Play();
             }
 
@@ -83,7 +82,9 @@ namespace CSPreALevelSkeleton
                             stars++;
                             if (stars == 2)
                             {
+                                Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.WriteLine("You've collected both the stars! Well done!");
+                                Console.ForegroundColor = ConsoleColor.White;
                             };
                         }
                         if (Monster.GetAwake() && !Eaten && !FlaskFound)
@@ -132,8 +133,19 @@ namespace CSPreALevelSkeleton
                 char Move;
                 try
                 {
-                    Move = char.ToUpperInvariant(char.Parse(Console.ReadLine()));
-                    Console.WriteLine();
+                    ConsoleKeyInfo consoleKey = Console.ReadKey();
+
+
+                    Move = Char.ToUpperInvariant(consoleKey.KeyChar);
+                    if (consoleKey.Key == ConsoleKey.RightArrow) Move = 'D';
+                    if (consoleKey.Key == ConsoleKey.LeftArrow) Move = 'A';
+                    if (consoleKey.Key == ConsoleKey.DownArrow) Move = 'S';
+                    if (consoleKey.Key == ConsoleKey.UpArrow) Move = 'W';
+
+
+                    return Move;
+                    //Move = char.ToUpperInvariant(char.Parse(Console.ReadLine()));
+                    //Console.WriteLine();
                     return Move;
                 }
                 catch (Exception e)
@@ -169,7 +181,7 @@ namespace CSPreALevelSkeleton
                 Direction = Char.ToUpperInvariant(Direction);
 
 
-
+                
                 if (!(Direction == 'W' || Direction == 'S' || Direction == 'A' || Direction == 'D' || Direction == 'M'))
                 {
                     ValidMove = false;
@@ -188,7 +200,7 @@ namespace CSPreALevelSkeleton
                 return Position;
             }
             Random rnd = new Random();
-            public void SetUpGame()
+            public void SetUpGame(int level)
             {
                 CellReference Position;
                 Cavern.Reset();
@@ -213,9 +225,20 @@ namespace CSPreALevelSkeleton
                     Position.NoOfCellsSouth = 2;
                     Trap1.SetPosition(Position);
                     Cavern.PlaceItem(Position, 'T');
-                    Position.NoOfCellsEast = 4;
-                    Position.NoOfCellsSouth = 3;
-                    Trap2.SetPosition(Position);
+
+                    if (level > 1)
+                    {
+                        Position.NoOfCellsEast = 4;
+                        Position.NoOfCellsSouth = 3;
+                        Trap2.SetPosition(Position);
+                    }
+
+                    if (level > 2)
+                    {
+                        Position.NoOfCellsEast = 4;
+                        Position.NoOfCellsSouth = 3;
+                        Trap3.SetPosition(Position);
+                    }
                     Position.NoOfCellsEast = rnd.Next(1, 4);
                     Position.NoOfCellsSouth = rnd.Next(1, 4);
                     Console.Write(Position);
@@ -269,29 +292,41 @@ namespace CSPreALevelSkeleton
                 int Count2;
                 for (Count1 = 0; Count1 <= NS; Count1++)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(" ------------- ");
                     for (Count2 = 0; Count2 <= WE; Count2++)
                     {
                         if (CavernState[Count1, Count2] == ' ' || CavernState[Count1, Count2] == '*' || (CavernState[Count1, Count2] == 'M' && MonsterAwake))
                         {
-                            Console.Write("|" + CavernState[Count1, Count2]);
+                            Console.ForegroundColor = ConsoleColor.Red;
+
+                            Console.Write("|" );
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(CavernState[Count1, Count2]);
+                            Console.ForegroundColor = ConsoleColor.Red;
+
                         }
                         else
                         {
+                            Console.ForegroundColor = ConsoleColor.Red;
+
                             Console.Write("| ");
                         }
                     }
+                    Console.ForegroundColor = ConsoleColor.Red;
+
                     Console.WriteLine("|");
                 }
                 Console.WriteLine(" ------------- ");
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.White; ;
+
             }
 
             public void PlaceItem(CellReference Position, char Item)
             {
                 try
                 {
-                    Console.WriteLine(Position.NoOfCellsEast);
                     if (Position.NoOfCellsEast < 0 || Position.NoOfCellsSouth < 0 || Position.NoOfCellsSouth > 5 || Position.NoOfCellsEast > 6)
                     {
                         Console.WriteLine("OH NICHOLAS LATIFI! you hit the wall..");
@@ -326,7 +361,6 @@ namespace CSPreALevelSkeleton
             public virtual void MakeMove(CellReference PlayerPosition)
             {
 
-                Console.WriteLine(NoOfCellsEast);
 
                 if (PlayerPosition.NoOfCellsEast < 0 || PlayerPosition.NoOfCellsSouth < 0 || PlayerPosition.NoOfCellsSouth > 5 || PlayerPosition.NoOfCellsEast > 6)
                 {
@@ -466,14 +500,23 @@ namespace CSPreALevelSkeleton
             while (Choice != 9)
             {
                 DisplayMenu();
+                //Choice = GetMainMenuChoice();
                 Choice = GetMainMenuChoice();
+                Game NewGame; 
                 switch (Choice)
                 {
+                    
                     case 1:
-                        Game NewGame = new Game(false);
+                        Game TrainingGame = new Game(true, 0);
                         break;
                     case 2:
-                        Game TrainingGame = new Game(true);
+                         NewGame = new Game(false, 1);
+                        break;
+                    case 3:
+                         NewGame = new Game(false, 2);
+                        break;
+                    case 4:
+                         NewGame = new Game(false, 2);
                         break;
                 }
             }
@@ -483,23 +526,32 @@ namespace CSPreALevelSkeleton
         {
             Console.WriteLine("MAIN MENU");
             Console.WriteLine();
-            Console.WriteLine("1. Start new game");
-            Console.WriteLine("2. Play training game");
+            Console.WriteLine("1. Play training game");
+            Console.WriteLine("2. Start new game (LEVEL 1)");
+            Console.WriteLine("3. Start new game (LEVEL 2)");
+            Console.WriteLine("4. Start new game (LEVEL 3)");
+
+
             Console.WriteLine("9. Quit");
             Console.WriteLine();
             Console.Write("Please enter your choice: ");
         }
+       
 
         public static int GetMainMenuChoice()
         {
             try
             {
                 int Choice;
-                Choice = int.Parse(Console.ReadLine());
-                Console.WriteLine();
+                ConsoleKeyInfo consoleKey = Console.ReadKey();
+
+                //Choice = int.Parse(Console.ReadLine());
+                //Console.WriteLine();
+                Choice = int.Parse(consoleKey.KeyChar.ToString());
                 return Choice;
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return GetMainMenuChoice();
             }
